@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.code-workspace
+.env
+.venv/
+.VSCodeCounter/
+temp/
+logs
+tests/test_pr.py
