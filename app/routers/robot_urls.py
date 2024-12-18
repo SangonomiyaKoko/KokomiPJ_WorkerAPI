@@ -34,7 +34,7 @@ async def getUserBind(
         return JSONResponse.API_8000_ServiceUnavailable
     path = '/r/user/bind/'
     params = {
-        'platform': platform,
+        'platform': platform.name,
         'user_id': user_id
     }
     result = await ProxyAPI.get(path=path, params=params)
@@ -76,16 +76,16 @@ async def searchUser(
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
-    language = UtilityFunctions.get_language_code(language)
+    language = UtilityFunctions.get_language_code(language.name)
     result = await user_basic.wws_user_basic(
         account_id=account_id,
         region_id=region_id,
-        game_type=game_type,
+        game_type=game_type.name,
         language=language,
         algo_type=algo_type,
         ac_value=ac_value,

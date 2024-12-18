@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # 将中间件添加到 FastAPI 应用
-app.add_middleware(RateLimitMiddleware, limit=60, time_window=60)
+# app.add_middleware(RateLimitMiddleware, limit=60, time_window=60)
 
 @app.get("/", summary='Root', tags=['Default'])
 async def root():
