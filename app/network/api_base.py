@@ -44,6 +44,7 @@ for key, value in proxy_config.items():
 
 class BaseUrl:
     REQUEST_TIME_OUT = 5
+    PROXY_TIME_OUT = 20
 
     def get_vortex_base_url(region_id: int):
         '''获取vortex api接口的url

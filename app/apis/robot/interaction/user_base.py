@@ -62,8 +62,13 @@ async def get_user_name_and_clan(
     if user_data['code'] != 1000:
         return user_data
     user_data = user_data['data']
+    user_basic['name'] = user_data['user']['name']
     if user_data['clan'] is None:
         valid_clan = False
+    else:
+        clan_basic['id'] = user_data['clan']['id']
+        clan_basic['tag'] = user_data['clan']['tag']
+        clan_basic['league'] = user_data['clan']['league']
     
     # 如果clan数据有效则只请求user数据，否则请求user和clan数据
     if valid_clan:

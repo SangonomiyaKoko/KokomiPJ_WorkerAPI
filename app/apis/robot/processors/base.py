@@ -10,7 +10,6 @@ class BaseFormatData:
         '''格式化处理好的数据
 
         根据需要来启用是否启用彩蛋
-        
         '''
         if show_rating_details:
             result = {

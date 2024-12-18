@@ -49,7 +49,7 @@ async def ping():
         return API_JSONResponse.API_8000_ServiceUnavailable
     return API_JSONResponse.API_1000_Success
 
-@app.get("/proxy", summary='proxy', tags=['Default'])
+@app.get("/proxy/", summary='proxy', tags=['Default'])
 async def proxy(
     url: str
 ):

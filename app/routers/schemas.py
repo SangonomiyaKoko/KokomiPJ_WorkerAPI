@@ -43,3 +43,9 @@ class GameTypeList(str, Enum):
     ranked = 'ranked'
     operation = 'operation'
     clan_battle = 'clan_battle'
+
+class BotUserBindModel(BaseModel):
+    platform: str = Field(..., description='平台')
+    user_id: str = Field(..., description='用户id')
+    region_id: int = Field(..., description='服务器id')
+    account_id: int = Field(..., description='用户id')
