@@ -3,10 +3,12 @@ from app.network import DetailsAPI
 from app.response import JSONResponse
 
 from .user_base import get_user_name_and_clan
-from ..processors.basic import (
+from ..processors.user_basic import (
     process_signature_data,
     process_lifetime_data,
-    process_overall_data
+    process_overall_data,
+    process_random_data,
+    process_ranked_data
     
 )
 
@@ -41,11 +43,19 @@ async def wws_user_basic(
             'statistics': {}
         }
         # 获取用户user和clan数据
-        user_and_clan_result = await get_user_name_and_clan(
-            account_id=account_id,
-            region_id=region_id,
-            ac_value=ac_value
-        )
+        if game_type == 'ranked':
+            user_and_clan_result = await get_user_name_and_clan(
+                account_id=account_id,
+                region_id=region_id,
+                ac_value=ac_value,
+                rank_data=True
+            )
+        else:
+            user_and_clan_result = await get_user_name_and_clan(
+                account_id=account_id,
+                region_id=region_id,
+                ac_value=ac_value
+            )
         if user_and_clan_result['code'] != 1000:
             return user_and_clan_result
         else:
@@ -67,23 +77,11 @@ async def wws_user_basic(
             },
             'random': {
                 'type_list': ['pvp_solo','pvp_div2','pvp_div3'],
-                'func_reference': None
-            },
-            'pvp_solo': {
-                'type_list': ['pvp_solo'],
-                'func_reference': None
-            },
-            'pvp_div2': {
-                'type_list': ['pvp_div2'],
-                'func_reference': None
-            },
-            'pvp_div3': {
-                'type_list': ['pvp_div3'],
-                'func_reference': None
+                'func_reference': process_random_data
             },
             'ranked': {
                 'type_list': ['rank_solo'],
-                'func_reference': None
+                'func_reference': process_ranked_data
             },
             'operation': {
                 'type_list': ['oper'],
@@ -106,6 +104,8 @@ async def wws_user_basic(
         for response in details_data:
             if response['code'] != 1000:
                 return response
+        if game_type == 'ranked':
+            details_data.append(user_and_clan_result['rank'])
         # 处理数据
         handle_api_data_func: function = game_type_data.get('func_reference')
         if not handle_api_data_func:

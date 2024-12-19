@@ -120,3 +120,43 @@ class BaseFormatData:
                 result['avg_frags'] = '{:.2f}'.format(result['avg_frags'])
                 result['rating'] = '{:,}'.format(result['rating']).replace(',', ' ')
         return result
+
+    def format_user_rank_processed_data(
+        algo_type: str,
+        processed_data: dict,
+        season_number: int
+    ):
+        result = {
+            'season_number': season_number,
+            'battles_count': 0,
+            'win_rate': 0.0,
+            'avg_damage': 0,
+            'avg_frags': 0.0,
+            'avg_exp': 0,
+            'best_season_rank': processed_data['best_season_rank'],
+            'best_rank': processed_data['best_rank'],
+            'win_rate_class': 0,
+        }
+        if processed_data['battles_count'] == 0:
+            result['battles_count'] = '-'
+            result['win_rate'] = '-'
+            result['avg_damage'] = '-'
+            result['avg_frags'] = '-'
+        else:
+            result['battles_count'] = processed_data['battles_count']
+            result['win_rate'] = round(processed_data['wins']/processed_data['battles_count']*100,2)
+            result['avg_damage'] = int(processed_data['damage_dealt']/processed_data['battles_count'])
+            result['avg_frags'] = round(processed_data['frags']/processed_data['battles_count'],2)
+            result['avg_exp'] = int(processed_data['original_exp']/processed_data['battles_count'])
+            if not algo_type:
+                result['win_rate_class'] = 0
+            elif processed_data['value_battles_count'] != 0:
+                result['win_rate_class'] = Rating_Algorithm.get_content_class(algo_type, 0, result['win_rate'])
+            else:
+                result['win_rate_class'] = Rating_Algorithm.get_content_class(algo_type, 0, -1)
+            result['battles_count'] = '{:,}'.format(result['battles_count']).replace(',', ' ')
+            result['win_rate'] = '{:.2f}%'.format(result['win_rate'])
+            result['avg_damage'] = '{:,}'.format(result['avg_damage']).replace(',', ' ')
+            result['avg_frags'] = '{:.2f}'.format(result['avg_frags'])
+            result['avg_exp'] = '{:,}'.format(result['avg_exp']).replace(',', ' ')
+        return result
