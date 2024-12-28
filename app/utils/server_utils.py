@@ -30,6 +30,7 @@ class ShipData:
         for ship_id in ship_ids:
             if (
                 str(ship_id) in ship_data and
+                ship_data[str(ship_id)][region] != {} and
                 ship_data[str(ship_id)][region]['battles_count'] >= 1000
             ):
                 result[ship_id] = [
