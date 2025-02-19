@@ -8,7 +8,7 @@ config = EnvConfig.get_config()
 # 定义 Celery 实例，连接到同一个 Redis
 celery_app = Celery(
     'producer',
-    broker=f"redis://:{config.MAIN_SERVICE_PASSWORD}@{config.MAIN_SERVICE_HOST}:6379/1",
+    broker=f"pyamqp://{config.RABBITMQ_USERNAME}:{config.RABBITMQ_PASSWORD}@{config.RABBITMQ_HOST}//",  # RabbitMQ 连接地址
     broker_connection_retry_on_startup = True
 )
 

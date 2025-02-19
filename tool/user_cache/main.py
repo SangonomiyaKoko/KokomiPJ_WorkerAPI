@@ -32,7 +32,8 @@ class ContinuousUserCacheUpdater:
                     for user in users_result['data']:
                         account_id = user['user_basic']['account_id']
                         region_id = user['user_basic']['region_id']
-                        if region_id in REGION_LIST:
+                        a = 0
+                        if region_id in REGION_LIST and (offset + i) % 4 == a:
                             logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
                             await Update.main(user)
                         i += 1

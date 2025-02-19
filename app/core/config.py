@@ -7,6 +7,14 @@ class LoadConfig(BaseSettings):
     MAIN_SERVICE_HOST: str
     MAIN_SERVICE_PASSWORD: str
     
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_PASSWORD: str
+    
+    RABBITMQ_HOST: str
+    RABBITMQ_USERNAME: str
+    RABBITMQ_PASSWORD: str
+    
     WG_API_TOKEN: str
     LESTA_API_TOKEN: str
 
