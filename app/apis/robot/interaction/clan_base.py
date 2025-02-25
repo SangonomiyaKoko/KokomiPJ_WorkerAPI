@@ -48,10 +48,6 @@ async def get_clan_tag_and_league(
         'division_rating': 0, 
         'last_battle_at': None
     }
-    clan_basic_result = await MainAPI.get_clan_basic(clan_id, region_id)
-    if clan_basic_result.get('code',None) != 1000:
-        return clan_basic_result
-    clan_basic['tag'] = clan_basic_result['data']['tag']
     # 获取claninfo
     basic_data = await BasicAPI.get_clan_basic(clan_id, region_id)
     for response in basic_data:
@@ -66,9 +62,8 @@ async def get_clan_tag_and_league(
             args=[clan_info]
         )
         return JSONResponse.API_1002_ClanNotExist
-    if clan_basic_result['data']['tag'] != basic_data[0]['data']['clan']['tag']:
-        # 工会名称改变
-        clan_basic['tag'] = basic_data[0]['data']['clan']['tag']
+    # 工会名称改变
+    clan_basic['tag'] = basic_data[0]['data']['clan']['tag']
     clan_basic['name'] = basic_data[0]['data']['clan']['name']
     clan_basic['level'] = basic_data[0]['data']['clan']['leveling']
     clan_basic['members'] = basic_data[0]['data']['clan']['members_count']
@@ -111,26 +106,17 @@ async def get_clan_tag_and_league(
                         stage_progress.append(0)
                 clan_season['stage_progress'] = str(stage_progress)
                 break
-    if (
-        clan_basic_result['data']['tag'] != basic_data[0]['data']['clan']['tag'] or 
-        clan_basic_result['data']['league'] != basic_data[0]['data']['wows_ladder']['league']
-    ):
-        celery_app.send_task(
-            name="check_clan_basic_and_info",
-            args=[{
-                'clan_id': clan_id,
-                'region_id': region_id,
-                'tag': clan_basic['tag'],
-                'league': clan_info['league']
-            },
-            clan_info
-            ]
-        )
-    else:
-        celery_app.send_task(
-            name="check_clan_info",
-            args=[clan_info]
-        )
+    celery_app.send_task(
+        name="check_clan_basic_and_info",
+        args=[{
+            'clan_id': clan_id,
+            'region_id': region_id,
+            'tag': clan_basic['tag'],
+            'league': clan_info['league']
+        },
+        clan_info
+        ]
+    )
     data = {
         'clan': clan_basic,
         'season': clan_season

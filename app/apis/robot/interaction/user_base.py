@@ -58,24 +58,7 @@ async def get_user_name_and_clan(
         'total_battles': 0,
         'last_battle_time': 0
     }
-    valid_clan = True
-    user_data = await MainAPI.get_user_basic(account_id,region_id)
-    if user_data['code'] != 1000:
-        return user_data
-    user_data = user_data['data']
-    user_basic['name'] = user_data['user']['name']
-    if user_data['clan'] is None:
-        valid_clan = False
-    else:
-        clan_basic['id'] = user_data['clan']['id']
-        clan_basic['tag'] = user_data['clan']['tag']
-        clan_basic['league'] = user_data['clan']['league']
-    
-    # 如果clan数据有效则只请求user数据，否则请求user和clan数据
-    if valid_clan:
-        basic_data = await BasicAPI.get_user_basic(account_id,region_id,ac_value)
-    else:
-        basic_data = await BasicAPI.get_user_basic_and_clan(account_id,region_id,ac_value)
+    basic_data = await BasicAPI.get_user_basic_and_clan(account_id,region_id,ac_value)
 
     for response in basic_data:
         if response['code'] != 1000 and response['code'] != 1001:
@@ -89,49 +72,18 @@ async def get_user_name_and_clan(
             args=[user_info]
         )
         return JSONResponse.API_1001_UserNotExist
-    if user_data['user']['name'] != basic_data[0]['data'][str(account_id)]['name']:
-        # 用户名称改变
-        user_basic['name'] = basic_data[0]['data'][str(account_id)]['name']
-        celery_app.send_task(
-            name="check_user_basic",
-            args=[{
-                'account_id':account_id,
-                'region_id':region_id,
-                'nickname':user_basic['name']
-            }]
-        )
+    user_basic['name'] = basic_data[0]['data'][str(account_id)]['name']
     if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
         # 隐藏战绩
         user_info['is_public'] = False
         user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-        if not valid_clan:
-            #处理工会信息
-            user_clan_data = basic_data[1]['data']
-            if user_clan_data['clan_id'] != None:
-                clan_basic['id'] = user_clan_data['clan_id']
-                clan_basic['tag'] = user_clan_data['clan']['tag']
-                clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-                celery_app.send_task(
-                    name="update_clan_and_user",
-                    args=[{
-                        'clan_id': clan_basic['id'],
-                        'region_id': region_id,
-                        'tag': clan_basic['tag'],
-                        'league': clan_basic['league']
-                    },
-                    {
-                        'account_id': user_basic['id'],
-                        'clan_id': clan_basic['id']
-                    }]
-                )
-            else:
-                celery_app.send_task(
-                    name="update_user_clan",
-                    args=[{
-                        'account_id': user_basic['id'],
-                        'clan_id': None
-                    }]
-                )
+        celery_app.send_task(
+            name="update_user_clan",
+            args=[{
+                'account_id': user_basic['id'],
+                'clan_id': None
+            }]
+        )
         celery_app.send_task(
             name="check_user_info",
             args=[user_info]
@@ -175,34 +127,33 @@ async def get_user_name_and_clan(
     user_basic['crated_at'] = user_basic_data['basic']['created_at']
     user_basic['actived_at'] = user_basic_data['basic']['last_battle_time']
     user_basic['dog_tag'] = basic_data[0]['data'][str(account_id)]['dog_tag']
-    if not valid_clan:
-        #处理工会信息
-        user_clan_data = basic_data[1]['data']
-        if user_clan_data['clan_id'] != None:
-            clan_basic['id'] = user_clan_data['clan_id']
-            clan_basic['tag'] = user_clan_data['clan']['tag']
-            clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-            celery_app.send_task(
-                name="update_clan_and_user",
-                args=[{
-                    'clan_id': clan_basic['id'],
-                    'region_id': region_id,
-                    'tag': clan_basic['tag'],
-                    'league': clan_basic['league']
-                },
-                {
-                    'account_id': user_basic['id'],
-                    'clan_id': clan_basic['id']
-                }]
-            )
-        else:
-            celery_app.send_task(
-                name="update_user_clan",
-                args=[{
-                    'account_id': user_basic['id'],
-                    'clan_id': None
-                }]
-            )
+    #处理工会信息
+    user_clan_data = basic_data[1]['data']
+    if user_clan_data['clan_id'] != None:
+        clan_basic['id'] = user_clan_data['clan_id']
+        clan_basic['tag'] = user_clan_data['clan']['tag']
+        clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
+        celery_app.send_task(
+            name="update_clan_and_user",
+            args=[{
+                'clan_id': clan_basic['id'],
+                'region_id': region_id,
+                'tag': clan_basic['tag'],
+                'league': clan_basic['league']
+            },
+            {
+                'account_id': user_basic['id'],
+                'clan_id': clan_basic['id']
+            }]
+        )
+    else:
+        celery_app.send_task(
+            name="update_user_clan",
+            args=[{
+                'account_id': user_basic['id'],
+                'clan_id': None
+            }]
+        )
     # 返回user和clan数据
     if not rank_data:
         data = {
