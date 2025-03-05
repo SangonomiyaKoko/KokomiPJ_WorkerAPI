@@ -28,18 +28,18 @@ async def get_clan_tag_and_league(
         'level': 0,
         'members': 0
     }
-    clan_season = {
-        'is_active': True,
-        'league': 4, 
-        'division': 2, 
-        'division_rating': 0, 
-        'stage_type': None,
-        'stage_process': None
+    update_date = {
+        'region_id': region_id,
+        'clan_id': clan_id,
+        'basic': None,
+        'info': None
+    }
+    clan_tag = {
+        'tag': None,
+        'league': None
     }
     # 用于后台更新user_info表的数据
     clan_info = {
-        'clan_id': clan_id,
-        'region_id': region_id,
         'is_active': True,
         'season_number': 0,
         'public_rating': 1100, 
@@ -47,6 +47,14 @@ async def get_clan_tag_and_league(
         'division': 2, 
         'division_rating': 0, 
         'last_battle_at': None
+    }
+    clan_season = {
+        'is_active': True,
+        'league': 4, 
+        'division': 2, 
+        'division_rating': 0, 
+        'stage_type': None,
+        'stage_process': None
     }
     # 获取claninfo
     basic_data = await BasicAPI.get_clan_basic(clan_id, region_id)
@@ -57,9 +65,11 @@ async def get_clan_tag_and_league(
     if basic_data[0]['code'] == 1002 or 'tag' not in basic_data[0]['data']['clan']:
         # 工会数据不存在
         clan_info['is_active'] = False
+        update_date['info'] = clan_info
         celery_app.send_task(
-            name="check_clan_info",
-            args=[clan_info]
+            name="update_clan_data",
+            args=[update_date],
+            queue='task_queue'
         )
         return JSONResponse.API_1002_ClanNotExist
     # 工会名称改变
@@ -73,10 +83,15 @@ async def get_clan_tag_and_league(
     clan_info['league'] = basic_data[0]['data']['wows_ladder']['league']
     clan_info['division'] = basic_data[0]['data']['wows_ladder']['division']
     clan_info['division_rating'] = basic_data[0]['data']['wows_ladder']['division_rating']
+    # 工会基本数据
+    clan_tag['tag'] = basic_data[0]['data']['clan']['tag']
+    clan_tag['league'] = basic_data[0]['data']['wows_ladder']['league']
+    update_date['basic'] = clan_tag
     if basic_data[0]['data']['wows_ladder']['last_battle_at']:
         clan_info['last_battle_at'] = int(
             datetime.fromisoformat(basic_data[0]['data']['wows_ladder']['last_battle_at']).timestamp()
         )
+    update_date['info'] = clan_info
     if basic_data[0]['data']['wows_ladder']['battles_count'] == 0:
         clan_season['league'] = basic_data[0]['data']['wows_ladder']['league']
         clan_season['division'] = basic_data[0]['data']['wows_ladder']['division']
@@ -107,15 +122,9 @@ async def get_clan_tag_and_league(
                 clan_season['stage_progress'] = str(stage_progress)
                 break
     celery_app.send_task(
-        name="check_clan_basic_and_info",
-        args=[{
-            'clan_id': clan_id,
-            'region_id': region_id,
-            'tag': clan_basic['tag'],
-            'league': clan_info['league']
-        },
-        clan_info
-        ]
+        name="update_clan_data",
+        args=[update_date],
+        queue='task_queue'
     )
     data = {
         'clan': clan_basic,
