@@ -59,9 +59,7 @@ async def searchUser(
     account_id: int,
     language: LanguageList,
     game_type: GameTypeList,
-    algo_type: Optional[AlgorithmList] = None,
-    ac_value: Optional[str] = None,
-    ac2_value: Optional[str] = None
+    algo_type: Optional[AlgorithmList] = None
 
 ) -> ResponseDict:
     """游戏用户数据接口
@@ -87,8 +85,6 @@ async def searchUser(
         region_id=region_id,
         game_type=game_type.name,
         language=language,
-        algo_type=algo_type,
-        ac_value=ac_value,
-        ac2_value=ac2_value
+        algo_type=algo_type
     )
     return result

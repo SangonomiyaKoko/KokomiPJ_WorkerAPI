@@ -9,21 +9,35 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from app.core import api_logger
-from app.middlewares import RateLimitMiddleware
+from app.middlewares import RedisConnection
 from app.response import JSONResponse as API_JSONResponse
 from app.core import ServiceStatus, EnvConfig
 from app.routers import platform_router, robot_router
+
+
+async def schedule():
+    while True:
+        api_logger.info("API日志数据上传")
+        # 这里实现具体任务
+        await asyncio.sleep(60)  # 每 60 秒执行一次任务
 
 # 应用程序的生命周期
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 从环境中加载配置
     EnvConfig.get_config()
+    # 初始化redis并测试redis连接
+    await RedisConnection.test_redis()
+    task = asyncio.create_task(schedule())  # 启动定时任务
 
     # 启动 lifespan
     yield
 
     # 应用关闭时释放连接
+
+    # 应用关闭时释放连接
+    await RedisConnection.close_redis()
+    task.cancel()  # 关闭 FastAPI 时取消任务
 
 app = FastAPI(lifespan=lifespan)
 
@@ -93,6 +107,10 @@ app.include_router(
 )
 
 # 重写shutdown函数，避免某些协程bug
+'''
+关于此处的问题，可以通过asyncio_atexit注册一个关闭事件解决
+具体原因请查看python协程时间循环的原理
+'''
 async def _shutdown(self, any = None):
     await origin_shutdown(self)
     wait_second = 3

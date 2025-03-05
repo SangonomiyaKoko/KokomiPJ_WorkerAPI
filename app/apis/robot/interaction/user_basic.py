@@ -1,6 +1,7 @@
 from app.log import ExceptionLogger
 from app.network import DetailsAPI
 from app.response import JSONResponse
+from app.middlewares import RedisConnection
 
 from .user_base import get_user_name_and_clan
 from ..processors.user_basic import (
@@ -18,9 +19,7 @@ async def wws_user_basic(
     region_id: int, 
     game_type: str,
     language: str,
-    algo_type: str,
-    ac_value: str = None,
-    ac2_value: str = None
+    algo_type: str
 ):
     '''用于`wws me`功能的接口
 
@@ -42,6 +41,18 @@ async def wws_user_basic(
             'clan': {}, 
             'statistics': {}
         }
+        # 读取ac数据
+        redis = RedisConnection.get_connection()
+        cache1_key = f"token_cache_1:{region_id}:{account_id}"
+        token_cache1 = await redis.get(cache1_key)
+        ac_value = None
+        if token_cache1:
+            ac_value = token_cache1
+        cache2_key = f"token_cache_2:{region_id}:{account_id}"
+        token_cache2 = await redis.get(cache2_key)
+        ac2_value = None
+        if token_cache2:
+            ac2_value = token_cache2
         # 获取用户user和clan数据
         if game_type == 'ranked':
             user_and_clan_result = await get_user_name_and_clan(
