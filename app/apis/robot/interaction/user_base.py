@@ -23,16 +23,6 @@ async def get_user_name_and_clan(
     返回：
         JSONResponse
     '''
-
-    '''
-    请求处理逻辑/
-    ├── 1. 从数据库中读取数据(user_basic,user_clan,clan_basic)
-    ├── 2. 首次请求接口获取用户和工会的基础数据/
-    │   └── (后台任务) 更新user_basic,user_clan和clan_basic表
-    ├── 3. 从用户基础数据，判断用户的状态(is_acctive,is_public等)/
-    │   └── (后台任务) 更新user_info表
-    └── 4. 返回结果
-    '''
     # 返回的user和clan数据格式
     user_basic = {
         'id': account_id,
