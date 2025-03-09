@@ -24,6 +24,15 @@ class UtilityFunctions:
                 return rid
         return None
     
+    def get_region_idx(region: str) -> int:
+        "从region获取region_id"
+        if region == 'all':
+            return 0
+        for r, rid in GameData.REGION_LIST.items():
+            if r == region:
+                return rid
+        return None
+    
     def check_aid_and_rid(account_id: int, region_id: int) -> bool:
         "检查account_id和region_id是否合法"
         if not (isinstance(account_id, int) and isinstance(region_id, int)):

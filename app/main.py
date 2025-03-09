@@ -96,13 +96,13 @@ async def proxy(
 
 app.include_router(
     platform_router, 
-    prefix="/p", 
+    prefix="/api/v1/platform", 
     tags=['Platform Interface']
 )
 
 app.include_router(
     robot_router, 
-    prefix="/r", 
+    prefix="/api/v1/robot", 
     tags=['Robot Interface']
 )
 

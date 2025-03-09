@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings
 
 class LoadConfig(BaseSettings):
     LOG_PATH: str
+    JSON_PATH: str
+    
     MAIN_SERVICE_HOST: str
     MAIN_SERVICE_PASSWORD: str
     

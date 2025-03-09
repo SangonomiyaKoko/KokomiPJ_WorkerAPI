@@ -16,6 +16,21 @@ class RegionList(str, Enum):
     ru = "ru"
     cn = "cn"
 
+class RankRegionList(str, Enum):
+    '''
+    关于region和region_id的区别
+
+    region主要是用于和前端相关进行交互
+
+    region_id主要是后端处理时使用
+    '''
+    all = "all"
+    asia = "asia"
+    eu = "eu"
+    na = "na"
+    ru = "ru"
+    cn = "cn"
+
 class PlatformList(str, Enum):
     qq_bot = 'qq_bot'
     qq_group = 'qq_group'

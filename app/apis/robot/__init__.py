@@ -1,5 +1,7 @@
-from .interaction import user_basic
+from .interaction import user_basic, user_bind, leaderboard
 
 __all__ = [
-    'user_basic'
+    'user_bind',
+    'user_basic',
+    'leaderboard'
 ]

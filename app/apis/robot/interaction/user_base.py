@@ -70,6 +70,7 @@ async def get_user_name_and_clan(
         )
         return JSONResponse.API_1001_UserNotExist
     # 处理用户信息
+    user_basic['name'] = basic_data[0]['data'][str(account_id)]['name']
     user_name['nickname'] = basic_data[0]['data'][str(account_id)]['name']
     update_data['basic'] = user_name
     #处理工会信息
