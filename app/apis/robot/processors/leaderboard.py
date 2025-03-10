@@ -1,3 +1,6 @@
+from app.utils import Rating_Algorithm
+
+
 def process_leaderboard_page_data(page_data: list):
     result = []
     for index in page_data:
@@ -34,7 +37,9 @@ def process_leaderboard_overall_data(user_data: dict):
         'win_rate': 0.0,
         'avg_damage': 0,
         'avg_frags': 0.0,
+        'avg_exp': 0,
         'rating': 0,
+        'rating_next': 0,
         'win_rate_class': 0,
         'avg_damage_class': 0,
         'avg_frags_class': 0,
@@ -50,9 +55,12 @@ def process_leaderboard_overall_data(user_data: dict):
     avg_frags_class, avg_frags = user_data['avg_frags'].split('|')
     result['avg_frags'] = avg_frags
     result['avg_frags_class'] = int(avg_frags_class)
+    result['avg_exp'] = '{:,}'.format(int(user_data['avg_exp'])).replace(',', ' ')
     rating_class, rating_value = user_data['rating'].split('|')
+    rating_class, rating_next = Rating_Algorithm.get_rating_class('pr', int(rating_value), True)
     result['rating'] = '{:,}'.format(int(rating_value)).replace(',', ' ')
     result['rating_class'] = int(rating_class)
+    result['rating_next'] = str(rating_next)
 
     return result
 
@@ -60,6 +68,7 @@ def process_leaderboard_rank_data(rank_data: dict):
     result = {
         'rank': None,
         'percentage': None,
+        'sum': None,
         'distribution': {
             'user_bin': None,
             'bin_count': None
@@ -67,9 +76,10 @@ def process_leaderboard_rank_data(rank_data: dict):
     }
     result['rank'] = str(rank_data['rank'])
     result['percentage'] = rank_data['percentage']
+    result['sum'] = '{:,}'.format(rank_data['distribution']['sum']).replace(',', ' ')
     result['distribution']['user_bin'] = str(rank_data['distribution']['user_bin'])
     temp_dict = {}
-    i = 0
+    i = 200
     while i <= 5000:
         temp_dict[str(i)] = 0
         i += 200
@@ -79,7 +89,7 @@ def process_leaderboard_rank_data(rank_data: dict):
         if bins[i] >= 5000:
             temp_dict['5000'] += counts[i]
         else:
-            temp_dict[str(bins[i])] += counts[i]
+            temp_dict[str(bins[i]+200)] += counts[i]
     result['distribution']['bin_count'] = temp_dict
     return result
 
