@@ -135,6 +135,7 @@ class ShipName:
         for ship_id in ship_ids:
             if str(ship_id) in main_data:
                 result[ship_id] = {
+                    'id': str(ship_id),
                     'tier':main_data[str(ship_id)]['tier'],
                     'type':main_data[str(ship_id)]['type'],
                     'nation':main_data[str(ship_id)]['nation'],

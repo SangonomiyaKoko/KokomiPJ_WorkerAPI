@@ -19,7 +19,7 @@ async def getVersion() -> ResponseDict:
     """获取最新版本"""
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    path = '/r/version/'
+    path = '/api/v1/wows/bot/version/'
     params = {}
     result = await ProxyAPI.get(path=path, params=params)
     return result

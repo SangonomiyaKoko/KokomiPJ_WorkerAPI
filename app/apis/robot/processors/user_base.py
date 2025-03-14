@@ -150,8 +150,6 @@ class BaseFormatData:
             result['avg_exp'] = int(processed_data['original_exp']/processed_data['battles_count'])
             if not algo_type:
                 result['win_rate_class'] = 0
-            elif processed_data['value_battles_count'] != 0:
-                result['win_rate_class'] = Rating_Algorithm.get_content_class(algo_type, 0, result['win_rate'])
             else:
                 result['win_rate_class'] = Rating_Algorithm.get_content_class(algo_type, 0, -1)
             result['battles_count'] = '{:,}'.format(result['battles_count']).replace(',', ' ')

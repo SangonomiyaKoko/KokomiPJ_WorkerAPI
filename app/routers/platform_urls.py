@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from app.core import ServiceStatus
 from app.response import ResponseDict, JSONResponse
 from app.utils import UtilityFunctions
-from app.apis.platform import SearchID
+from app.apis.platform import SearchID, CheckID
 from .schemas import RegionList, LanguageList
 
 router = APIRouter()
@@ -42,6 +42,33 @@ async def searchUser(
         nickname = nickname.lower(),
         limit = limit,
         check = check
+    )
+    return result
+
+@router.get("/check/user/", summary="检查用户uid是否有效")
+async def searchUser(
+    region: RegionList,
+    account_id: int
+) -> ResponseDict:
+    """用户搜索接口
+
+    检查用户输入的uid是否对应有用户
+
+    参数:
+    - region: 服务器
+    - account_id: UID
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    result = await CheckID.check_user(
+        region_id = region_id,
+        account_id = account_id
     )
     return result
 

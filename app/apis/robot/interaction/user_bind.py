@@ -17,7 +17,7 @@ async def get_user_bind(
     try:
         redis = RedisConnection.get_connection()
         key = f"app_bot:bind_cache:{platform}:{user_id}"
-        data = redis.get(key)
+        data = await redis.get(key)
         if data:
             data = json.loads(data)
         return JSONResponse.get_success_response(data)

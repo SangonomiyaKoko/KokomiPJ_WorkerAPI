@@ -116,7 +116,7 @@ async def wws_user_basic(
             if response['code'] != 1000:
                 return response
         if game_type == 'ranked':
-            details_data.append(user_and_clan_result['rank'])
+            details_data.append(user_and_clan_result['data']['rank'])
         # 处理数据
         handle_api_data_func: function = game_type_data.get('func_reference')
         if not handle_api_data_func:
