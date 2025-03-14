@@ -29,7 +29,7 @@ async def get_user_name_and_clan(
         'region': region_id,
         'name': UtilityFunctions.get_user_default_name(account_id),
         'karma': 0,
-        'crated_at': 0,
+        'created_at': 0,
         'actived_at': 0,
         'dog_tag': {}
     }
@@ -131,7 +131,7 @@ async def get_user_name_and_clan(
     )
     # 获取user_basic的数据
     user_basic['karma'] = user_basic_data['basic']['karma']
-    user_basic['crated_at'] = user_basic_data['basic']['created_at']
+    user_basic['created_at'] = user_basic_data['basic']['created_at']
     user_basic['actived_at'] = user_basic_data['basic']['last_battle_time']
     user_basic['dog_tag'] = basic_data[0]['data'][str(account_id)]['dog_tag']
     # 返回user和clan数据

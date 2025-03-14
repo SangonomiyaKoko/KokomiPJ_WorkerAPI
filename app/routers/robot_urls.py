@@ -81,7 +81,7 @@ async def searchUser(
     )
     return result
 
-@router.get("/leaderboard/page/{region_id}/{ship_id}/", summary="获取排行榜单页数据")
+@router.get("/leaderboard/page/{region}/{ship_id}/", summary="获取排行榜单页数据")
 async def get_leaderboard(
     region: RankRegionList,
     ship_id: int,
@@ -104,7 +104,7 @@ async def get_leaderboard(
     )
     return result
 
-@router.get("/leaderboard/user/{region_id}/{ship_id}/{account_id}/", summary="获取用户的单表排名")
+@router.get("/leaderboard/user/{region2}/{ship_id}/{region}/{account_id}/", summary="获取用户的单表排名")
 async def get_user_rank(
     region: RegionList,
     account_id: int,
