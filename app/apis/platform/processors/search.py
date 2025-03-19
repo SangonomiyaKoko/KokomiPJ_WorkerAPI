@@ -1,6 +1,6 @@
 from app.response import ResponseDict, JSONResponse
 from app.const import ClanColor
-from app.middlewares import celery_app
+from app.middlewares import CeleryProducer
 
 def process_search_user_data(
     region_id: int, 
@@ -39,7 +39,7 @@ def process_search_user_data(
             update_datas.append(update_data)
         else:
             update_datas.append(update_data)
-    celery_app.send_task(
+    CeleryProducer.send_task(
         name="update_user_data",
         args=[update_datas],
         queue='task_queue'
@@ -87,7 +87,7 @@ def process_search_clan_data(
         }
         update_data['basic'] = clan_basic
         update_datas.append(update_data)
-    celery_app.send_task(
+    CeleryProducer.send_task(
         name="update_clan_data",
         args=[update_datas],
         queue='task_queue'

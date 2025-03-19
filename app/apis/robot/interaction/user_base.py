@@ -3,7 +3,7 @@ from typing import Optional
 from app.utils import UtilityFunctions
 from app.network import BasicAPI, MainAPI
 from app.response import JSONResponse, ResponseDict
-from app.middlewares import celery_app
+from app.middlewares import CeleryProducer
 
 async def get_user_name_and_clan(
     account_id: int,
@@ -63,7 +63,7 @@ async def get_user_name_and_clan(
         # 用户数据不存在
         user_info['is_active'] = False
         update_data['info'] = user_info
-        celery_app.send_task(
+        CeleryProducer.send_task(
             name="update_user_data",
             args=[update_data],
             queue='task_queue'
@@ -86,7 +86,7 @@ async def get_user_name_and_clan(
         # 隐藏战绩
         user_info['is_public'] = False
         update_data['info'] = user_info
-        celery_app.send_task(
+        CeleryProducer.send_task(
             name="update_user_data",
             args=[update_data],
             queue='task_queue'
@@ -103,7 +103,7 @@ async def get_user_name_and_clan(
         # 用户没有数据
         user_info['is_active'] = False
         update_data['info'] = user_info
-        celery_app.send_task(
+        CeleryProducer.send_task(
             name="update_user_data",
             args=[update_data],
             queue='task_queue'
@@ -114,7 +114,7 @@ async def get_user_name_and_clan(
         user_info['total_battles'] = 0
         user_info['last_battle_time'] = 0
         update_data['info'] = user_info
-        celery_app.send_task(
+        CeleryProducer.send_task(
             name="update_user_data",
             args=[update_data],
             queue='task_queue'
@@ -124,7 +124,7 @@ async def get_user_name_and_clan(
     user_info['total_battles'] = user_basic_data['basic']['leveling_points']
     user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
     update_data['info'] = user_info
-    celery_app.send_task(
+    CeleryProducer.send_task(
         name="update_user_data",
         args=[update_data],
         queue='task_queue'

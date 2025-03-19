@@ -3,7 +3,7 @@ from datetime import datetime
 from app.utils import UtilityFunctions
 from app.network import BasicAPI, MainAPI
 from app.response import JSONResponse, ResponseDict
-from app.middlewares.celery import celery_app
+from app.middlewares.celery import CeleryProducer
 
 async def get_clan_tag_and_league(
     clan_id: int,
@@ -66,7 +66,7 @@ async def get_clan_tag_and_league(
         # 工会数据不存在
         clan_info['is_active'] = False
         update_date['info'] = clan_info
-        celery_app.send_task(
+        CeleryProducer.send_task(
             name="update_clan_data",
             args=[update_date],
             queue='task_queue'
@@ -121,7 +121,7 @@ async def get_clan_tag_and_league(
                         stage_progress.append(0)
                 clan_season['stage_progress'] = str(stage_progress)
                 break
-    celery_app.send_task(
+    CeleryProducer.send_task(
         name="update_clan_data",
         args=[update_date],
         queue='task_queue'
