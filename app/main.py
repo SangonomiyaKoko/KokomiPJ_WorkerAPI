@@ -9,10 +9,10 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from app.core import api_logger
-from app.middlewares import RedisConnection
+from app.middlewares import RedisConnection, CeleryProducer
 from app.response import JSONResponse as API_JSONResponse
 from app.core import ServiceStatus, EnvConfig
-from app.routers import platform_router, robot_router
+from app.routers import platform_router, robot_router, app_router
 
 
 async def schedule():
@@ -26,6 +26,7 @@ async def schedule():
 async def lifespan(app: FastAPI):
     # 从环境中加载配置
     EnvConfig.get_config()
+    CeleryProducer.init_celery()
     # 初始化redis并测试redis连接
     await RedisConnection.test_redis()
     task = asyncio.create_task(schedule())  # 启动定时任务
@@ -104,6 +105,12 @@ app.include_router(
     robot_router, 
     prefix="/api/v1/robot", 
     tags=['Robot Interface']
+)
+
+app.include_router(
+    app_router, 
+    prefix="/api/v1/webapp", 
+    tags=['WebAPP Interface']
 )
 
 # 重写shutdown函数，避免某些协程bug
