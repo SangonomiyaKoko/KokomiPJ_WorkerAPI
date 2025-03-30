@@ -359,11 +359,13 @@ def process_overall_data(
             ship_type = ship_info['type']
             for index in ['battles_count','wins','damage_dealt','frags','original_exp']:
                 overall_data['battle_type'][battle_type][index] += ship_data[index]
-                overall_data['ship_type'][ship_type][index] += ship_data[index]
+                if battle_type != 'rank_solo':
+                    overall_data['ship_type'][ship_type][index] += ship_data[index]
             if ship_data['value_battles_count'] > 0:
                 for index in ['value_battles_count','personal_rating','n_damage_dealt','n_frags']:
                     overall_data['battle_type'][battle_type][index] += ship_data[index]
-                    overall_data['ship_type'][ship_type][index] += ship_data[index]
+                    if battle_type != 'rank_solo':
+                        overall_data['ship_type'][ship_type][index] += ship_data[index]
             if battle_type != 'rank_solo':
                 if ship_data['battles_count'] > 0:
                     overall_data['chart_data'][str(ship_tier)] += ship_data['battles_count']
