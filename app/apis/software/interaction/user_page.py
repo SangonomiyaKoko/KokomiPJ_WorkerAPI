@@ -2,7 +2,7 @@ from app.log import ExceptionLogger
 from app.network import DetailsAPI
 from app.response import JSONResponse
 from app.middlewares import RedisConnection
-from app.utils import UtilityFunctions
+from app.utils import UtilityFunctions, TimeFormat
 
 from .user_base import get_user_name_and_clan
 
@@ -42,14 +42,18 @@ async def user_page(
         if user_and_clan_result['code'] != 1000:
             return user_and_clan_result
         else:
+            data['header']['region'] = {
+                'id': str(region_id),
+                'name': UtilityFunctions.get_region(region_id)
+            }
             user_result = user_and_clan_result['data']['user']
             data['header']['user'] = {
                 'id': str(user_result['id']),
                 'name': str(user_result['name']),
                 'level': user_result['level'],
                 'karmas': user_result['karma'],
-                'created_at': user_result['created_at'] // (24*60*60),
-                'actived_at': user_result['actived_at'] // (24*60*60)
+                'created_at': (TimeFormat.get_current_timestamp() - user_result['created_at']) // (24*60*60),
+                'actived_at': (TimeFormat.get_current_timestamp() - user_result['actived_at']) // (24*60*60)
             }
             clan_result = user_and_clan_result['data']['clan']
             if clan_result['id'] != None:
