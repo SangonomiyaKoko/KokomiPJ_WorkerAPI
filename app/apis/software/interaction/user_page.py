@@ -6,6 +6,10 @@ from app.utils import UtilityFunctions, TimeFormat
 
 from .user_base import get_user_name_and_clan
 
+from ..processors.user_page import (
+    process_overall_data
+)
+
 @ExceptionLogger.handle_program_exception_async
 async def user_page(
     account_id: int, 
@@ -19,12 +23,7 @@ async def user_page(
                 'user': {},
                 'clan': {}
             },
-            'body1': {
-                'user': {},
-                'static': {},
-                'rank': {},
-                'record': {}
-            }, 
+            'PlayerDatas': {}, 
             'ships': {}
         }
         # 读取ac数据
@@ -68,6 +67,24 @@ async def user_page(
                     'tag': None,
                     'league': 5
                 }
+        # 请求数据
+        details_data = await DetailsAPI.get_user_detail(
+            account_id=account_id,
+            region_id=region_id,
+            type_list=['pvp'],
+            ac_value=ac_value
+        )
+        for response in details_data:
+            if response['code'] != 1000:
+                return response
+        processed_data = process_overall_data(
+            account_id = account_id, 
+            region_id = region_id, 
+            responses = details_data,
+        )
+        if processed_data.get('code', None) != 1000:
+            return processed_data
+        data['PlayerDatas'] = processed_data['data']
         # 返回结果
         return JSONResponse.get_success_response(data)
     except Exception as e:
