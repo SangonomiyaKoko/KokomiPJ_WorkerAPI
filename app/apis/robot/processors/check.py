@@ -7,14 +7,22 @@ def process_check_user_data(
     response: dict
 ) -> ResponseDict:
     # 用户数据
-    if 'hidden_profile' in response['data'][str(account_id)]:
-        hidden = True
-    else:
-        hidden = False
-    # 处理用户信息
-    nickname = response['data'][str(account_id)]['name']
     data = {
-        'name': nickname,
-        'hidden': hidden
+        'name': None,
+        'hidden': None,
+        'level': None,
+        'dog_tag': None
     }
+    # 处理用户信息
+    data['name'] = response['data'][str(account_id)]['name']
+    if 'hidden_profile' in response['data'][str(account_id)]:
+        data['hidden'] = True
+    else:
+        data['hidden'] = False
+        data['dog_tag'] = response['data'][str(account_id)]['dog_tag']
+        if (
+            response['data'][str(account_id)] == {} or
+            response['data'][str(account_id)]['basic'] == {}
+        ):
+            data['level'] = response['data'][str(account_id)]['basic']['level']
     return JSONResponse.get_success_response(data)
