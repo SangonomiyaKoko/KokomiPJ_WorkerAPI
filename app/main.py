@@ -17,7 +17,7 @@ from app.routers import platform_router, robot_router, app_router
 
 async def schedule():
     while True:
-        api_logger.info("API日志数据上传")
+        api_logger.info("Update log file")
         # 这里实现具体任务
         await asyncio.sleep(60)  # 每 60 秒执行一次任务
 

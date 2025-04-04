@@ -49,15 +49,15 @@ class AlgorithmList(str, Enum):
 
 class GameTypeList(str, Enum):
     signature = 'signature'
-    lifetime = 'lifetime'
+    # lifetime = 'lifetime'
     overall = 'overall'
-    random = 'random'
-    pvp_solo = 'pvp_solo'
-    pvp_div2 = 'pvp_div2'
-    pvp_div3 = 'pvp_div3'
-    ranked = 'ranked'
-    operation = 'operation'
-    clan_battle = 'clan_battle'
+    # random = 'random'
+    # pvp_solo = 'pvp_solo'
+    # pvp_div2 = 'pvp_div2'
+    # pvp_div3 = 'pvp_div3'
+    # ranked = 'ranked'
+    # operation = 'operation'
+    # clan_battle = 'clan_battle'
 
 class BotUserBindModel(BaseModel):
     platform: str = Field(..., description='平台')
