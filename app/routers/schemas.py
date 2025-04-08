@@ -59,6 +59,20 @@ class GameTypeList(str, Enum):
     # operation = 'operation'
     # clan_battle = 'clan_battle'
 
+class BasicFilterList(str, Enum):
+    pvp = 'random'
+    rank = 'ranked'
+    pvp_solo = 'pvp_solo'
+    pvp_div2 = 'pvp_div2'
+    pvp_div3 = 'pvp_div3'
+    AirCarrier = 'aircarrier'
+    Battleship = 'battleship'
+    Cruiser = 'cruiser'
+    Destroyer = 'destroyer'
+    Submarine = 'submarine'
+    SurfaceShips = 'surface_ships'
+
+
 class BotUserBindModel(BaseModel):
     platform: str = Field(..., description='平台')
     user_id: str = Field(..., description='用户id')
