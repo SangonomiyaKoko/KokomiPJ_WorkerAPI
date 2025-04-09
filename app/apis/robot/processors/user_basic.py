@@ -590,8 +590,7 @@ def process_overall_data(
             'battle_type': {
                 'solo': {},
                 'div2': {},
-                'div3': {},
-                'rank_solo': {}
+                'div3': {}
             },
             'ship_type': {
                 'AirCarrier': {},
