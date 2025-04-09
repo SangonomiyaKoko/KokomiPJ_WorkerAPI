@@ -22,7 +22,7 @@ def process_check_user_data(
         data['dog_tag'] = response['data'][str(account_id)]['dog_tag']
         if (
             response['data'][str(account_id)] == {} or
-            response['data'][str(account_id)]['basic'] == {}
+            'basic' not in response['data'][str(account_id)]
         ):
             data['level'] = response['data'][str(account_id)]['basic']['level']
     return JSONResponse.get_success_response(data)
