@@ -56,6 +56,7 @@ async def post_user_bind(
             return result[0]
         result = process_check_user_data(region_id,account_id,result[0])
         basic_data['name'] = result['data']['name']
+        basic_data['hidden'] = result['data']['hidden']
         basic_data['level'] = result['data']['level']
         basic_data['dog_tag'] = result['data']['dog_tag']
         data['user'] = basic_data
