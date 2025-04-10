@@ -21,7 +21,7 @@ def process_check_user_data(
         data['hidden'] = False
         data['dog_tag'] = response['data'][str(account_id)]['dog_tag']
         if (
-            'basic' in response['data'][str(account_id)]
+            'basic' in response['data'][str(account_id)]['statistics']
         ):
-            data['level'] = response['data'][str(account_id)]['basic']['leveling_tier']
+            data['level'] = response['data'][str(account_id)]['statistics']['basic']['leveling_tier']
     return JSONResponse.get_success_response(data)
