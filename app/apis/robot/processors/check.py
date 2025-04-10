@@ -23,5 +23,5 @@ def process_check_user_data(
         if (
             'basic' in response['data'][str(account_id)]
         ):
-            data['level'] = response['data'][str(account_id)]['basic']['level']
+            data['level'] = response['data'][str(account_id)]['basic']['leveling_tier']
     return JSONResponse.get_success_response(data)
