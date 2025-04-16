@@ -7,7 +7,7 @@ from app.response import ResponseDict, JSONResponse
 from app.network import ProxyAPI
 from app.utils import UtilityFunctions
 from app.apis.robot import (
-    user_basic, user_bind, leaderboard,
+    user_card, user_bind, leaderboard,
     user_basic1, user_basic2
 )
 from .schemas import (
@@ -47,6 +47,39 @@ async def postUserBind(
         return JSONResponse.API_8000_ServiceUnavailable
     data = user_data.model_dump()
     result = await user_bind.post_user_bind(data)
+    return result
+
+@router.get("/user/stats/card/", summary="用户基本数据")
+async def searchUser(
+    region: RegionList,
+    account_id: int,
+    language: LanguageList,
+    algo_type: Optional[AlgorithmList] = None
+) -> ResponseDict:
+    """游戏用户基本数据数据接口
+
+    用于实现/basic功能接口（不带筛选条件）
+
+    参数:
+        ......
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    region_id = UtilityFunctions.get_region_id(region.name)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    language = UtilityFunctions.get_language_code(language.name)
+    result = await user_card.wws_user_basic(
+        account_id=account_id,
+        region_id=region_id,
+        language=language,
+        algo_type=algo_type
+    )
     return result
 
 @router.get("/user/stats/basic1/", summary="用户基本数据")

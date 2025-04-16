@@ -8,7 +8,8 @@ from app.middlewares import CeleryProducer
 async def get_user_name_and_clan(
     account_id: int,
     region_id: str,
-    ac_value: Optional[str] = None
+    ac_value: Optional[str] = None,
+    rank_data: Optional[bool] = False
 ) -> ResponseDict:
     '''获取用户的基本数据(name+clan)
 
@@ -98,7 +99,7 @@ async def get_user_name_and_clan(
     user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
     if (
         user_basic_data == {} or
-        'basic' not in user_basic_data
+        'basic' not in user_basic_data 
     ):
         # 用户没有数据
         user_info['is_active'] = False
@@ -136,8 +137,54 @@ async def get_user_name_and_clan(
     user_basic['actived_at'] = user_basic_data['basic']['last_battle_time']
     user_basic['dog_tag'] = basic_data[0]['data'][str(account_id)]['dog_tag']
     # 返回user和clan数据
-    data = {
-        'user': user_basic,
-        'clan': clan_basic
-    }
+    if not rank_data:
+        data = {
+            'user': user_basic,
+            'clan': clan_basic
+        }
+    else:
+        rank_basic = season_data(user_basic_data['seasons'], user_basic_data['rank_info'])
+        data = {
+            'user': user_basic,
+            'clan': clan_basic,
+            'rank': rank_basic
+        }
     return JSONResponse.get_success_response(data)
+
+def season_data(season_data: dict, rank_data: dict) -> dict:
+    result = {}
+    for season_index in season_data:
+        if len(season_index) != 4:
+            continue
+        result[season_index] = {
+            'battles_count': 0, 
+            'wins': 0, 
+            'damage_dealt': 0,
+            'frags': 0, 
+            'original_exp': 0, 
+            'best_season_rank': 3, 
+            'best_rank': 10
+        }
+        for index in ['battles_count', 'wins', 'damage_dealt', 'frags', 'original_exp']:
+            if season_index in ['1001','1002','1003']:
+                result[season_index][index] = season_data[str(season_index)]['-1']['rank_solo'][index]
+            else:
+                result[season_index][index] = season_data[str(season_index)]['0']['rank_solo'][index]
+        for _, season_stage_data in rank_data[season_index].items():
+            for num in [1, 2, 3]:
+                if str(num) in season_stage_data:
+                    if result[season_index]['best_season_rank'] > num:
+                        result[season_index]['best_season_rank'] = num
+                        result[season_index]['best_rank'] = season_stage_data[str(num)]['rank_best']
+                        continue
+                    elif (
+                        result[season_index]['best_season_rank'] == num
+                        and result[season_index]['best_rank'] > season_stage_data[str(num)]['rank_best']
+                    ):
+                        result[season_index]['best_rank'] = season_stage_data[str(num)]['rank_best']
+                        continue
+                    continue
+                else:
+                    continue
+    sorted_dict = dict(sorted(result.items(), reverse=True))
+    return sorted_dict

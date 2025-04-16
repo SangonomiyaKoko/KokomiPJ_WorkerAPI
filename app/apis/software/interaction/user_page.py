@@ -13,7 +13,8 @@ from ..processors.user_page import (
 @ExceptionLogger.handle_program_exception_async
 async def user_page(
     account_id: int, 
-    region_id: int
+    region_id: int,
+    language: str
 ):
     try:
         # 返回数据的格式
@@ -23,8 +24,7 @@ async def user_page(
                 'user': {},
                 'clan': {}
             },
-            'PlayerDatas': {}, 
-            'ships': {}
+            'personalIndex': {}, 
         }
         # 读取ac数据
         redis = RedisConnection.get_connection()
@@ -36,7 +36,8 @@ async def user_page(
         user_and_clan_result = await get_user_name_and_clan(
             account_id=account_id,
             region_id=region_id,
-            ac_value=ac_value
+            ac_value=ac_value,
+            rank_data=True
         )
         if user_and_clan_result['code'] != 1000:
             return user_and_clan_result
@@ -71,7 +72,7 @@ async def user_page(
         details_data = await DetailsAPI.get_user_detail(
             account_id=account_id,
             region_id=region_id,
-            type_list=['pvp'],
+            type_list=['pvp', 'pvp_solo','pvp_div2','pvp_div3','rank_solo'],
             ac_value=ac_value
         )
         for response in details_data:
@@ -81,10 +82,12 @@ async def user_page(
             account_id = account_id, 
             region_id = region_id, 
             responses = details_data,
+            rank_data = user_and_clan_result['data']['rank'],
+            language = language
         )
         if processed_data.get('code', None) != 1000:
             return processed_data
-        data['PlayerDatas'] = processed_data['data']
+        data['personalIndex'] = processed_data['data']
         # 返回结果
         return JSONResponse.get_success_response(data)
     except Exception as e:

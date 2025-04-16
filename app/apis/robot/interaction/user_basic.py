@@ -7,9 +7,7 @@ from .user_base import get_user_name_and_clan
 from ..processors.user_basic import (
     process_signature_data,
     process_lifetime_data,
-    process_overall_data,
-    process_random_data,
-    process_ranked_data
+    process_overall_data
     
 )
 
@@ -85,14 +83,6 @@ async def wws_user_basic(
             'overall': {
                 'type_list': ['pvp_solo','pvp_div2','pvp_div3','rank_solo'],
                 'func_reference': process_overall_data
-            },
-            'random': {
-                'type_list': ['pvp_solo','pvp_div2','pvp_div3'],
-                'func_reference': process_random_data
-            },
-            'ranked': {
-                'type_list': ['rank_solo'],
-                'func_reference': process_ranked_data
             },
             'operation': {
                 'type_list': ['oper'],

@@ -13,7 +13,8 @@ router = APIRouter()
 @router.get("/user/page/", summary="用户数据页接口")
 async def searchUser(
     region: RegionList,
-    account_id: int
+    account_id: int,
+    language: LanguageList
 ) -> ResponseDict:
     """游戏用户数据接口
 
@@ -27,8 +28,10 @@ async def searchUser(
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    language = UtilityFunctions.get_language_code(language.name)
     result = await user_page.user_page(
         account_id=account_id,
-        region_id=region_id
+        region_id=region_id,
+        language=language
     )
     return result
