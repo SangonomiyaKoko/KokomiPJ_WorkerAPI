@@ -14,7 +14,7 @@ def process_overall_data(
     result = {
         'playerPerformance': {},
         'playerStatistics': {},
-        'constRankData': {},
+        'palyerRankData': {},
         'playerRecord': {}
     }
     none_processed_data = {
@@ -243,7 +243,7 @@ def process_overall_data(
                 "level": '10'
             }
         const_rank_data.append(temp_data)
-    result['constRankData'] = const_rank_data
+    result['palyerRankData'] = const_rank_data
     player_record = []
     record_name_dict = {
         'max_damage_dealt': 'max_dmg', 
