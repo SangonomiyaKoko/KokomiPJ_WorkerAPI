@@ -9,7 +9,8 @@ async def get_user_name_and_clan(
     account_id: int,
     region_id: str,
     ac_value: Optional[str] = None,
-    rank_data: Optional[bool] = False
+    rank_data: Optional[bool] = False,
+    battles_data: Optional[bool] = False
 ) -> ResponseDict:
     '''获取用户的基本数据(name+clan)
 
@@ -29,6 +30,7 @@ async def get_user_name_and_clan(
         'region': region_id,
         'name': UtilityFunctions.get_user_default_name(account_id),
         'karma': 0,
+        'level': 0,
         'created_at': 0,
         'actived_at': 0,
         'dog_tag': {}
@@ -131,22 +133,20 @@ async def get_user_name_and_clan(
     )
     # 获取user_basic的数据
     user_basic['karma'] = user_basic_data['basic']['karma']
+    user_basic['level'] = user_basic_data['basic']['leveling_tier']
     user_basic['created_at'] = user_basic_data['basic']['created_at']
     user_basic['actived_at'] = user_basic_data['basic']['last_battle_time']
     user_basic['dog_tag'] = basic_data[0]['data'][str(account_id)]['dog_tag']
     # 返回user和clan数据
-    if not rank_data:
-        data = {
-            'user': user_basic,
-            'clan': clan_basic
-        }
-    else:
+    data = {
+        'user': user_basic,
+        'clan': clan_basic
+    }
+    if rank_data:
         rank_basic = season_data(user_basic_data['seasons'], user_basic_data['rank_info'])
-        data = {
-            'user': user_basic,
-            'clan': clan_basic,
-            'rank': rank_basic
-        }
+        data['rank'] = rank_basic
+    if battles_data:
+        data['battles'] = '{:,}'.format(user_basic_data['basic']['leveling_points']).replace(',', ' ')
     return JSONResponse.get_success_response(data)
 
 def season_data(season_data: dict, rank_data: dict) -> dict:

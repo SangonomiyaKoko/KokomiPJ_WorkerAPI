@@ -1,5 +1,6 @@
 from app.utils import ShipName,ShipData,Rating_Algorithm, ColorUtils
 from app.response import JSONResponse, ResponseDict
+from app.const import GameData
 from .user_base import BaseFormatData
 
 def process_signature_data(
@@ -15,8 +16,10 @@ def process_signature_data(
     '''
     # 返回数据的格式
     result = {
-        'random': {},
-        'ranked': {}
+        'total': {},
+        'stats': {},
+        'record': {},
+        'achievement': {}
     }
     none_processed_data = {
         'battles_count': 0,
@@ -28,6 +31,18 @@ def process_signature_data(
         'n_damage_dealt': 0,
         'n_frags': 0
     }
+    
+    record_dict = {
+        'max_damage_dealt': {'value': 0, 'vehicle': None},
+        'max_exp': {'value': 0, 'vehicle': None},
+        'max_frags': {'value': 0, 'vehicle': None},
+        'max_planes_killed': {'value': 0, 'vehicle': None}
+    }
+    achievement_dict = {
+        'ranked': {},
+        'clan_battle': {}
+    }
+    total_ach = 0
     processed_data = {} # 处理好的数据
     formatted_data = {} # 格式化好的数据
     ship_ids = set() # 需要处理的ship_id集合
@@ -35,8 +50,33 @@ def process_signature_data(
     for response in responses:
         if i == 0:
             battle_type = 'pvp'
-        else:
+        elif i == 1:
             battle_type = 'rank_solo'
+        else:
+            rank_dict = {
+                '0': 0, '1': 0, '2': 0
+            }
+            cw_dict = {
+                '0': 0, '1': 0, '2': 0,
+                '3': 0, '4': 0
+            }
+            achievement_data = response['data'][str(account_id)]['statistics']['achievements']
+            for ach_id, ach_data in achievement_data.items():
+                if region_id == 4:
+                    cw_achievement_dict = GameData.lesta_cw_achievement_dict
+                else:
+                    cw_achievement_dict = GameData.wg_cw_achievement_dict
+                if ach_id in cw_achievement_dict:
+                    if cw_achievement_dict[ach_id] == '0':
+                        print(ach_id)
+                    cw_dict[cw_achievement_dict[ach_id]] += ach_data['count']
+                    continue
+                if ach_id in GameData.rank_achievement_dict:
+                    rank_dict[GameData.rank_achievement_dict[ach_id]] += ach_data['count']
+                total_ach += ach_data['count']
+            achievement_dict['ranked'] = rank_dict
+            achievement_dict['clan_battle'] = cw_dict
+            break
         i += 1
         for ship_id, ship_data in response['data'][str(account_id)]['statistics'].items():
             # 读取并保留原始数据中需要的数据
@@ -53,6 +93,10 @@ def process_signature_data(
             if ship_data[battle_type] != {}:
                 for index in ['battles_count','wins','damage_dealt','frags']:
                     processed_data[ship_id][battle_type][index] = ship_data[battle_type][index]
+                for record_index in ['max_damage_dealt', 'max_exp', 'max_frags', 'max_planes_killed']:
+                    if ship_data[battle_type][record_index] > record_dict[record_index]['value']:
+                        record_dict[record_index]['value'] = ship_data[battle_type][record_index]
+                        record_dict[record_index]['vehicle'] = ship_id
     # 获取船只的信息
     ship_info_dict = ShipName.get_ship_info_batch(region_id,language,ship_ids)
     # 获取船只服务器数据
@@ -107,6 +151,26 @@ def process_signature_data(
             if ship_data['value_battles_count'] > 0:
                 for index in ['value_battles_count','personal_rating','n_damage_dealt','n_frags']:
                     overall_data[battle_type][index] += ship_data[index]
+    for record_type in ['max_damage_dealt', 'max_exp', 'max_frags', 'max_planes_killed']:
+        if record_dict[record_type]['vehicle'] == None:
+            continue
+        ship_id = record_dict[record_type]['vehicle']
+        ship_info = ship_info_dict.get(ship_id,None)
+        if ship_info is None:
+            ship_tier = 1
+            ship_type = 'Cruiser'
+            ship_name = 'UnknowShip'
+        else:
+            ship_tier = ship_info['tier']
+            ship_type = ship_info['type']
+            ship_name = ship_info['name']
+
+        temp_data = {
+            "count": '{:,}'.format(record_dict[record_type]['value']).replace(',', ' '),    #实际数字
+            "tier": GameData.TIER_NAME_LIST.get(ship_tier),    #船只等级
+            "name": ship_name,    #船名
+        }
+        record_dict[record_type] = temp_data
     formatted_data = {
         'random': {},
         'ranked': {}
@@ -118,13 +182,18 @@ def process_signature_data(
         return JSONResponse.API_1006_UserDataisNone
     for battle_type in ['random', 'ranked']:
         # 数据格式化
-        formatted_data[battle_type] = BaseFormatData.format_basic_processed_data(
+        formatted_data[battle_type] = BaseFormatData.format_card_processed_data(
             algo_type = algo_type,
             processed_data = overall_data[battle_type]
         )
-
-    for battle_type in ['random', 'ranked']:
-        result[battle_type] = formatted_data[battle_type]
+    result ['record'] = record_dict
+    result['stats'] = formatted_data
+    result['total'] = {
+        'battles_count': 0,
+        'ships_count': '{:,}'.format(len(ship_ids)).replace(',', ' '),
+        'achievements_count': '{:,}'.format(total_ach).replace(',', ' ')
+    }
+    result['achievement'] = achievement_dict
     return JSONResponse.get_success_response(result)
 
 def process_lifetime_data(

@@ -44,7 +44,8 @@ async def wws_user_basic(
         user_and_clan_result = await get_user_name_and_clan(
             account_id=account_id,
             region_id=region_id,
-            ac_value=ac_value
+            ac_value=ac_value,
+            battles_data=True
         )
         if user_and_clan_result['code'] != 1000:
             return user_and_clan_result
@@ -55,7 +56,7 @@ async def wws_user_basic(
         details_data = await DetailsAPI.get_user_detail(
             account_id=account_id,
             region_id=region_id,
-            type_list=['pvp','rank_solo'],
+            type_list=['pvp','rank_solo', 'achievement'],
             ac_value=ac_value
         )
         for response in details_data:
@@ -69,6 +70,7 @@ async def wws_user_basic(
             language = language,
             algo_type = algo_type
         )
+        processed_data['data']['total']['battles_count'] = user_and_clan_result['data']['battles']
         if processed_data.get('code', None) != 1000:
             return processed_data
         data['statistics'] = processed_data['data']

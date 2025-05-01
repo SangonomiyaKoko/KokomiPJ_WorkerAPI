@@ -121,6 +121,61 @@ class BaseFormatData:
                 result['rating'] = '{:,}'.format(result['rating']).replace(',', ' ')
         return result
 
+    def format_card_processed_data(
+        algo_type: str,
+        processed_data: dict
+    ):
+        '''格式化处理好的数据
+
+        根据需要来启用是否启用彩蛋
+        '''
+        result = {
+            'battles_count': 0,
+            'win_rate': 0.0,
+            'avg_damage': 0,
+            'avg_frags': 0.0,
+            'rating': 0,
+            'win_rate_class': 0,
+            'avg_damage_class': 0,
+            'avg_frags_class': 0,
+            'rating_class': 0
+        }
+        if processed_data['battles_count'] == 0:
+            result['battles_count'] = '-'
+            result['win_rate'] = '-'
+            result['avg_damage'] = '-'
+            result['avg_frags'] = '-'
+            result['rating'] = '-1'
+        else:
+            result['battles_count'] = processed_data['battles_count']
+            result['win_rate'] = round(processed_data['wins']/processed_data['battles_count']*100,2)
+            result['avg_damage'] = int(processed_data['damage_dealt']/processed_data['battles_count'])
+            result['avg_frags'] = round(processed_data['frags']/processed_data['battles_count'],2)
+            if not algo_type:
+                result['rating'] = -2
+                result['win_rate_class'] = 0
+                result['avg_damage_class'] = 0
+                result['avg_frags_class'] = 0
+                result['rating_class'] = 0
+            elif processed_data['value_battles_count'] != 0:
+                result['rating'] = int(processed_data['personal_rating']/processed_data['value_battles_count'])
+                result['win_rate_class'] = Rating_Algorithm.get_content_class(algo_type, 0, result['win_rate'])
+                result['avg_damage_class'] = Rating_Algorithm.get_content_class(algo_type, 1, processed_data['n_damage_dealt']/processed_data['value_battles_count'])
+                result['avg_frags_class'] = Rating_Algorithm.get_content_class(algo_type, 2, processed_data['n_frags']/processed_data['value_battles_count'])
+                result['rating_class'] = Rating_Algorithm.get_content_class(algo_type, 3, processed_data['personal_rating']/processed_data['value_battles_count'])
+            else:
+                result['rating'] = -1
+                result['win_rate_class'] = Rating_Algorithm.get_content_class(algo_type, 0, -1)
+                result['avg_damage_class'] = Rating_Algorithm.get_content_class(algo_type, 1, -1)
+                result['avg_frags_class'] = Rating_Algorithm.get_content_class(algo_type, 2, -1)
+                result['rating_class'] = Rating_Algorithm.get_content_class(algo_type, 3, -1)
+            result['battles_count'] = '{:,}'.format(result['battles_count']).replace(',', ' ')
+            result['win_rate'] = '{:.2f}%'.format(result['win_rate'])
+            result['avg_damage'] = '{:,}'.format(result['avg_damage']).replace(',', ' ')
+            result['avg_frags'] = '{:.2f}'.format(result['avg_frags'])
+            result['rating'] = '{:,}'.format(result['rating']).replace(',', ' ')
+        return result
+
     def format_user_rank_processed_data(
         algo_type: str,
         processed_data: dict,

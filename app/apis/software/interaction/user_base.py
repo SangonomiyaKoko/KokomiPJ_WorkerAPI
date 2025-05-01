@@ -169,7 +169,10 @@ def season_data(season_data: dict, rank_data: dict) -> dict:
             if season_index in ['1001','1002','1003']:
                 result[season_index][index] = season_data[str(season_index)]['-1']['rank_solo'][index]
             else:
-                result[season_index][index] = season_data[str(season_index)]['0']['rank_solo'][index]
+                if '0' not in season_data[str(season_index)]:
+                    result[season_index][index] = season_data[str(season_index)]['3']['rank_solo'][index]
+                else:
+                    result[season_index][index] = season_data[str(season_index)]['0']['rank_solo'][index]
         for _, season_stage_data in rank_data[season_index].items():
             for num in [1, 2, 3]:
                 if str(num) in season_stage_data:
