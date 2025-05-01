@@ -30,6 +30,24 @@ class ShipName:
                 in_str = in_str.replace(index, '')
         in_str = in_str.lower()
         return in_str
+    
+    def __data_format(ship_id: int, main_data: dict):
+        return {
+            "id": ship_id,
+            "tier": main_data[ship_id]['tier'], 
+            "type": main_data[ship_id]['type'], 
+            "nation": main_data[ship_id]['nation'], 
+            "premium": main_data[ship_id]['premium'], 
+            "special": main_data[ship_id]['special'], 
+            "index": main_data[ship_id]['index'], 
+            "ship_name": {
+                'cn': main_data[ship_id]['ship_name']['cn'],
+                'en': main_data[ship_id]['ship_name']['en'],
+                'ja': main_data[ship_id]['ship_name']['ja'],
+                'ru': main_data[ship_id]['ship_name']['ru'],
+                "en_full": main_data[ship_id]['ship_name']['en_l'],
+            }
+        }
         
     @classmethod
     def search_ship(cls, ship_name: str, region_id: int, language: str, use_nick: bool):
@@ -54,38 +72,17 @@ class ShipName:
             old = False
 
         result = []
+        exists_ids = []
         # 别名表匹配
         if use_nick:
             for ship_id, ship_data in nick_data[language].items():
                 for index in ship_data:
                     if ship_name_format == cls.__name_format(index):
-                        result[ship_id] = {
-                            "id": ship_id,
-                            "tier": main_data[ship_id]['tier'], 
-                            "type": main_data[ship_id]['type'], 
-                            "nation": main_data[ship_id]['nation'], 
-                            "premium": main_data[ship_id]['premium'], 
-                            "special": main_data[ship_id]['special'], 
-                            "index": main_data[ship_id]['index'], 
-                            "ship_name": {
-                                'cn': main_data[ship_id]['ship_name']['cn'],
-                                'en': main_data[ship_id]['ship_name']['en'],
-                                'ja': main_data[ship_id]['ship_name']['ja'],
-                                'ru': main_data[ship_id]['ship_name']['ru'],
-                                "en_full": main_data[ship_id]['ship_name']['en_l'],
-                            }
-                        }
+                        result.append(cls.__data_format(ship_id, main_data)) 
                         return result
         for ship_id, ship_data in main_data.items():
             if ship_name_format == cls.__name_format(ship_data['ship_name']['en']):
-                result[ship_id] = {
-                    'tier':main_data[ship_id]['tier'],
-                    'type':main_data[ship_id]['type'],
-                    'cn':main_data[ship_id]['ship_name']['cn'],
-                    'en':main_data[ship_id]['ship_name']['en'],
-                    'ja':main_data[ship_id]['ship_name']['ja'],
-                    'ru':main_data[ship_id]['ship_name']['ru']
-                }
+                result.append(cls.__data_format(ship_id, main_data)) 
                 return result
             if language in ['cn','ja','ru','en']:
                 if language == 'en':
@@ -93,27 +90,15 @@ class ShipName:
                 else:
                     lang = language
                 if ship_name_format == cls.__name_format(ship_data['ship_name'][lang]):
-                    result[ship_id] = {
-                        'tier':main_data[ship_id]['tier'],
-                        'type':main_data[ship_id]['type'],
-                        'cn':main_data[ship_id]['ship_name']['cn'],
-                        'en':main_data[ship_id]['ship_name']['en'],
-                        'ja':main_data[ship_id]['ship_name']['ja'],
-                        'ru':main_data[ship_id]['ship_name']['ru']
-                    }
+                    result.append(cls.__data_format(ship_id, main_data)) 
                     return result
         for ship_id, ship_data in main_data.items():
             if ship_name_format in cls.__name_format(ship_data['ship_name']['en']):
                 if old == False and ship_id in GameData.OLD_SHIP_ID_LIST:
                     continue
-                result[ship_id] = {
-                    'tier':main_data[ship_id]['tier'],
-                    'type':main_data[ship_id]['type'],
-                    'cn':main_data[ship_id]['ship_name']['cn'],
-                    'en':main_data[ship_id]['ship_name']['en'],
-                    'ja':main_data[ship_id]['ship_name']['ja'],
-                    'ru':main_data[ship_id]['ship_name']['ru']
-                }
+                if ship_id not in exists_ids:
+                    result.append(cls.__data_format(ship_id, main_data)) 
+                    exists_ids.append(ship_id)
             if language in ['cn','ja','ru','en']:
                 if language == 'en':
                     lang = 'en_l'
@@ -122,14 +107,9 @@ class ShipName:
                 if ship_name_format in cls.__name_format(ship_data['ship_name'][lang]):
                     if old == False and ship_id in GameData.OLD_SHIP_ID_LIST:
                         continue
-                    result[ship_id] = {
-                        'tier':main_data[ship_id]['tier'],
-                        'type':main_data[ship_id]['type'],
-                        'cn':main_data[ship_id]['ship_name']['cn'],
-                        'en':main_data[ship_id]['ship_name']['en'],
-                        'ja':main_data[ship_id]['ship_name']['ja'],
-                        'ru':main_data[ship_id]['ship_name']['ru']
-                    }
+                    if ship_id not in exists_ids:
+                        result.append(cls.__data_format(ship_id, main_data)) 
+                        exists_ids.append(ship_id)
         return result
     
     def get_ship_info_batch(region_id: int, language: str, ship_ids: List[int] | Set[int]) -> dict:

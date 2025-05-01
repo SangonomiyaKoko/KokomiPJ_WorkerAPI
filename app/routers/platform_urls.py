@@ -131,6 +131,8 @@ async def searchShip(
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
+    if all(('0' <= c <= '9' or 'A' <= c <= 'Z' or 'a' <= c <= 'z') for c in shipname) and len(shipname) < 2:
+        return JSONResponse.API_1021_IllegalShipName
     language = UtilityFunctions.get_language_code(language)
     result = await SearchID.search_ship(
         region_id = region_id,
